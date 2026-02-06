@@ -1,0 +1,55 @@
+name: Update Beaminster Events Calendar (Manual Download)
+
+# Runs on the 1st of every month at 6 AM
+on:
+  schedule:
+    - cron: '0 6 1 * *'
+  
+  # Allows you to run manually anytime
+  workflow_dispatch:
+
+jobs:
+  generate-events:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Get the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      # Set up Python
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      # Install required packages
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 python-dotenv
+      
+      # Run the events script
+      - name: Generate events data
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          EVENTBRITE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
+        run: |
+          python production_agent.py
+          echo "✅ Events data generated!"
+      
+      # Save the generated files so you can download them
+      - name: Upload generated files
+        uses: actions/upload-artifact@v3
+        with:
+          name: hugholidays-events-data
+          path: |
+            /home/runner/work/hugholidays-events/hugholidays-events/hugholidays_events.json
+            /home/runner/work/hugholidays-events/hugholidays-events/events_preview.html
+          retention-days: 90
+      
+      # Success message
+      - name: Done!
+        run: |
+          echo "✅ Files ready to download!"
+          echo "Go to the Actions tab, click this run, and download the artifact"
