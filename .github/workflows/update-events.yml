@@ -37,15 +37,16 @@ jobs:
         run: |
           python production_agent.py
           echo "✅ Events data generated!"
+          ls -la
       
       # Save the generated files so you can download them
       - name: Upload generated files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hugholidays-events-data
           path: |
-            /home/runner/work/hugholidays-events/hugholidays-events/hugholidays_events.json
-            /home/runner/work/hugholidays-events/hugholidays-events/events_preview.html
+            *.json
+            *.html
           retention-days: 90
       
       # Success message
